@@ -7,8 +7,8 @@ import traceback
 backend_path = os.path.join(os.path.dirname(__file__), '..', 'backend')
 sys.path.insert(0, backend_path)
 
-# Create a simple app first with static files in the api directory
-app = Flask(__name__, static_folder='../frontend/dist', static_url_path='')
+# Create a simple app first with static files in the backend/static directory
+app = Flask(__name__, static_folder='../backend/static', static_url_path='')
 app.config['DEBUG'] = True
 
 @app.route('/health')
@@ -51,10 +51,10 @@ def debug():
 @app.route('/')
 def index():
     try:
-        # Try to serve from multiple possible locations
+        # Try to serve from multiple possible locations (prioritize existing ones)
         static_dirs = [
+            '../backend/static',  # This exists according to debug
             '../frontend/dist',
-            '../backend/static', 
             './static',
             '../static'
         ]
@@ -83,8 +83,8 @@ def index():
 def serve_assets(filename):
     try:
         static_dirs = [
+            '../backend/static/assets',  # This exists according to debug
             '../frontend/dist/assets',
-            '../backend/static/assets',
             './static/assets', 
             '../static/assets'
         ]
