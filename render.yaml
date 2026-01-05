@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: faucet-app
+    env: python
+    buildCommand: "cd frontend && npm install && npm run build && cd ../backend && pip install -r requirements.txt"
+    startCommand: "cd backend && python app.py"
+    envVars:
+      - key: FLASK_ENV
+        value: production

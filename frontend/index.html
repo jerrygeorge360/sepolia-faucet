@@ -2,14 +2,281 @@
 <html>
 <head>
   <title>Testnet Faucet</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+    select, button {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background-color: #0056b3;
+    }
+    #output {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      min-height: 50px;
+    }
+    .instructions {
+      background-color: #e8f4fd;
+      border: 1px solid #bee5eb;
+      border-radius: 5px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .instructions h3 {
+      color: #0c5460;
+      margin-top: 0;
+    }
+    .token-addresses {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .token-item {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .token-item strong {
+      min-width: 60px;
+      color: #495057;
+    }
+    .address {
+      background-color: #f1f3f4;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      flex: 1;
+      min-width: 200px;
+      word-break: break-all;
+    }
+    .copy-btn {
+      width: auto !important;
+      padding: 6px 12px !important;
+      font-size: 12px !important;
+      background-color: #28a745 !important;
+      margin: 0 !important;
+    }
+    .copy-btn:hover {
+      background-color: #218838 !important;
+    }
+    .instructions ol {
+      padding-left: 20px;
+    }
+    .instructions li {
+      margin: 8px 0;
+    }
+    
+    /* Wallet status and alert styles */
+    .wallet-status {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 20px 0;
+      display: none;
+    }
+    .wallet-status.connected {
+      display: block;
+    }
+    .wallet-address {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      word-break: break-all;
+      background-color: #f8f9fa;
+      padding: 8px;
+      border-radius: 3px;
+      margin-top: 5px;
+    }
+    
+    .alert {
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+      border-width: 1px;
+      border-style: solid;
+      display: none;
+      position: relative;
+    }
+    .alert.show {
+      display: block;
+      animation: fadeIn 0.3s ease-in;
+    }
+    .alert-success {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+    .alert-error {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+    .alert-warning {
+      background-color: #fff3cd;
+      border-color: #ffeaa7;
+      color: #856404;
+    }
+    .alert-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.7;
+      width: auto !important;
+      padding: 0 !important;
+    }
+    .alert-close:hover {
+      opacity: 1;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Loading state */
+    .loading {
+      opacity: 0.6;
+      cursor: wait;
+    }
+    .loading button {
+      cursor: wait;
+    }
+  </style>
 </head>
 <body>
-  <h1>Claim Your Sepolia Tokens</h1>
+  <div class="container">
+    <h1>Claim Your Sepolia Tokens</h1>
+    
+    <!-- Alert messages -->
+    <div id="alert-success" class="alert alert-success">
+      <button class="alert-close" onclick="hideAlert('alert-success')">&times;</button>
+      <div id="success-message"></div>
+    </div>
+    
+    <div id="alert-error" class="alert alert-error">
+      <button class="alert-close" onclick="hideAlert('alert-error')">&times;</button>
+      <div id="error-message"></div>
+    </div>
+    
+    <div id="alert-warning" class="alert alert-warning">
+      <button class="alert-close" onclick="hideAlert('alert-warning')">&times;</button>
+      <div id="warning-message"></div>
+    </div>
+    
+    <!-- Wallet status -->
+    <div id="wallet-status" class="wallet-status">
+      <strong>🟢 Wallet Connected</strong>
+      <div class="wallet-address" id="wallet-address"></div>
+    </div>
+    
+    <div class="form-group">
+      <label for="token-select">Select Token:</label>
+      <select id="token-select">
+        <option value="">Choose a token...</option>
+        <option value="DAI">DAI (18 decimals)</option>
+        <option value="USDC">USDC (6 decimals)</option>
+        <option value="USDT">USDT (6 decimals)</option>
+        <option value="WBTC">WBTC (8 decimals)</option>
+      </select>
+    </div>
 
-  <button id="connect">Connect Wallet</button>
-  <button id="claim" disabled>Claim 10 Tokens</button>
+    <button id="connect">Connect Wallet</button>
+    <button id="claim" disabled>Claim 10 Tokens</button>
 
-  <pre id="output"></pre>
+    <div class="instructions">
+      <h3>How to Add Tokens to MetaMask</h3>
+      <p><strong>After claiming tokens, add them to your MetaMask wallet:</strong></p>
+      <ol>
+        <li>Open MetaMask and make sure you're on <strong>Sepolia Testnet</strong></li>
+        <li>Scroll down and click <strong>"Import tokens"</strong></li>
+        <li>Click <strong>"Custom token"</strong></li>
+        <li>Copy and paste the contract address for your token:</li>
+      </ol>
+      
+      <div class="token-addresses">
+        <div class="token-item">
+          <strong>DAI:</strong> 
+          <code class="address">0xAd22b4EC8cdd8A803d0052632566F6334A04F1F3</code>
+          <button class="copy-btn" onclick="copyAddress('0xAd22b4EC8cdd8A803d0052632566F6334A04F1F3')">Copy</button>
+        </div>
+        <div class="token-item">
+          <strong>USDC:</strong> 
+          <code class="address">0xcF9884827F587Cd9a0bDce33995B2333eE7e8285</code>
+          <button class="copy-btn" onclick="copyAddress('0xcF9884827F587Cd9a0bDce33995B2333eE7e8285')">Copy</button>
+        </div>
+        <div class="token-item">
+          <strong>USDT:</strong> 
+          <code class="address">0x1861BB06286aAb0fDA903620844b4Aef4894b719</code>
+          <button class="copy-btn" onclick="copyAddress('0x1861BB06286aAb0fDA903620844b4Aef4894b719')">Copy</button>
+        </div>
+        <div class="token-item">
+          <strong>WBTC:</strong> 
+          <code class="address">0x4267652AF61B4bE50A39e700ee2a160f42371f54</code>
+          <button class="copy-btn" onclick="copyAddress('0x4267652AF61B4bE50A39e700ee2a160f42371f54')">Copy</button>
+        </div>
+      </div>
+      
+      <p><small><em>MetaMask will automatically detect the token symbol and decimals. After adding, your claimed tokens will appear in your wallet!</em></small></p>
+    </div>
+
+    <pre id="output">Select a token and connect your wallet to get started.</pre>
+  </div>
 
   <script type="module" src="main.js"></script>
 </body>
