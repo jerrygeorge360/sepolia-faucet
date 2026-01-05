@@ -291,3 +291,6 @@ if __name__ == "__main__":
     logger.info(f"Faucet address: {FAUCET_ADDRESS}")
     
     app.run(host="0.0.0.0", port=port, debug=debug)
+
+# Export for Vercel
+handler = app
