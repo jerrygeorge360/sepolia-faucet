@@ -1,0 +1,16 @@
+{
+  "name": "faucet-frontend",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "viem": "^2.9.0",
+    "wagmi": "^2.6.0"
+  },
+  "devDependencies": {
+    "vite": "^5.1.0"
+  }
+}
