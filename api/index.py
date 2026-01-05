@@ -35,6 +35,15 @@ def debug():
         else:
             static_info[static_dir] = "Does not exist"
     
+    # List all available routes
+    routes_info = []
+    for rule in app.url_map.iter_rules():
+        routes_info.append({
+            "rule": rule.rule,
+            "endpoint": rule.endpoint,
+            "methods": list(rule.methods)
+        })
+    
     return {
         "status": "debug info",
         "backend_path": backend_path,
@@ -44,7 +53,8 @@ def debug():
         "backend_files": os.listdir(backend_path) if os.path.exists(backend_path) else "not found",
         "static_path": app.static_folder,
         "static_exists": os.path.exists(app.static_folder) if app.static_folder else False,
-        "static_directories": static_info
+        "static_directories": static_info,
+        "available_routes": routes_info
     }
 
 # Simple route to serve the frontend
@@ -126,12 +136,12 @@ try:
     # Try to import the main app's API routes
     from app import app as main_app
     
-    # Copy the API routes from main app
+    # Copy the API routes from main app (look for URLs starting with /api/)
     for rule in main_app.url_map.iter_rules():
-        if rule.endpoint.startswith('api'):  # Only copy API routes
+        if rule.rule.startswith('/api/'):  # Only copy API routes based on URL path
             app.add_url_rule(
                 rule.rule, 
-                rule.endpoint, 
+                rule.endpoint + '_imported',  # Rename endpoint to avoid conflicts
                 main_app.view_functions[rule.endpoint],
                 methods=rule.methods
             )
